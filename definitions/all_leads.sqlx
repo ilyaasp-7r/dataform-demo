@@ -1,3 +1,5 @@
+config { type: "table" }
+
 SELECT *
 from `silver_sozo_skin.all_leads`
 where date(`date`) >= "2024-11-01"
