@@ -1,0 +1,3 @@
+SELECT
+clinic
+FROM `bronze_sozo_dental.dim_clinics`
