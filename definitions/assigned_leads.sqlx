@@ -1,2 +1,4 @@
+config { type: "table" }
+
 SELECT *
 from silver_sozo_skin.assigned_leads
