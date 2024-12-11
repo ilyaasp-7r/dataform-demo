@@ -7,7 +7,8 @@ config {
     age: docs.age,
     answer_count: docs.answer_count,
     question_count: docs.question_count
-  }
+  },
+  tags: ["source"]
 }
 
 SELECT

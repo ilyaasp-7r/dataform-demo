@@ -1,4 +1,9 @@
-config { type: "table" }
+config { 
+    type: "table",
+    name: "all_leads",
+    schema: "silver_sozo_skin",
+    tags: ["source"]
+}
 
 SELECT *
 from `silver_sozo_skin.all_leads`
