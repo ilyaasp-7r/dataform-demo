@@ -1,6 +1,7 @@
 config {
   type: "view",
   name: "overridden_names",
+  schema: "bronze_sozo_skin", 
   columns: {
     user_id: docs.user_id,
     age: docs.age,
