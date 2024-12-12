@@ -1,7 +1,8 @@
 config {
     type: "table",
     name: "unearned_revenue_voucher_packages",
-    schema: "silver_sozo_dental"
+    schema: "silver_sozo_dental",
+    tags: ["dental-unearned"]
 }
 
 WITH voucher_package as ( 
