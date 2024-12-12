@@ -1,0 +1,62 @@
+config {
+    type: "table",
+    name: "unearned_revenue_voucher_packages",
+    schema: "silver_sozo_dental",
+    tags: ["dental-unearned"]
+}
+
+WITH voucher_package as ( 
+SELECT
+branch_name 
+, TRIM(UPPER(code)) voucher_code
+, branch_id 
+, published_on
+, sold_price
+-- CONCAT(RIGHT(clinic_code,3), ' ', clinic) clinic
+-- , date_trunc(published_on, month) month
+-- , SUM(sold_price * (100 - percent_used)) unearned
+FROM bronze_sozo_dental.omnicare_voucher_and_packages
+-- LEFT JOIN bronze_sozo_dental.dim_clinics on branch_name = clinic
+WHERE 1=1
+AND voucher_status = 'AKTIF'
+AND UPPER(category) != 'VOUCHER TUNAI'
+AND branch_name NOT IN ('HO','TEST')
+AND published_on >= '2024-01-01'
+-- QUALIFY ROW_NUMBER() OVER(PARTITION BY code) > 1
+)
+
+, redemption as (
+SELECT
+TRIM(UPPER(voucher)) voucher_code
+, SUM(actual_amount) actual_amount
+FROM bronze_sozo_dental.omnicare_payments
+WHERE 1=1
+AND invoice_status = 'AKTIF'
+AND branch_name NOT IN ('HO','TEST')
+AND UPPER(payment_method) IN ('VOUCHER TUNAI','VOUCHER PAKET')
+GROUP BY 1
+)
+
+, get_unearned as (
+SELECT
+CONCAT(RIGHT(clinic_code,3), ' ', clinic) clinic
+, date_trunc(published_on, month) month
+-- branch_name 
+, voucher_code
+-- , branch_id 
+-- , published_on
+, sold_price
+, actual_amount
+, COALESCE(sold_price, 0) - COALESCE(actual_amount, 0) AS unearned
+FROM voucher_package
+LEFT JOIN redemption USING(voucher_code)
+LEFT JOIN bronze_sozo_dental.dim_clinics on branch_name = clinic
+
+)
+
+SELECT
+clinic 
+, month 
+, SUM(CASE WHEN unearned < 0 THEN 0 ELSE unearned END) AS unearned ----same as skin, kalo ada yg minus dijadikan 0
+FROM get_unearned 
+GROUP BY 1,2
